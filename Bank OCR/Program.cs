@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using OCRReader.Classes;
+using OCRReader.Enums;
 using OCRReader.Helpers;
 
 namespace OCRReader
@@ -8,7 +9,7 @@ namespace OCRReader
     internal class Program
     {
         private static readonly char[][] BufferArr = new char[4][];
-        private static readonly OcrEngine OcrEngine = new OcrEngine(80, 1);
+        private static readonly OcrEngine OcrEngine = new OcrEngine(80, 1, 3);
         private static string[] _lineStrings;
         private static int _recordCount;
         private static int _currRecord;
@@ -22,15 +23,15 @@ namespace OCRReader
             {
                 ReadRecord();
                 CharArrayHelper.DisplayRaw(BufferArr); //Show the current Buffer
-                var decoded = OcrEngine.Decode(BufferArr);
-                Console.WriteLine($"Result: {decoded}");
+                var result = OcrEngine.Decode(BufferArr);
+                ConsoleHelper.Write($"{result}", MessageType.Info);
             }
 
             Console.ReadKey();
         }
 
         /// <summary>
-        ///   Read the File into LineStrings
+        ///   Read the File into _lineStrings
         /// </summary>
         /// <param name="path">Path of the File</param>
         private static void ReadFile(string path)
@@ -40,7 +41,7 @@ namespace OCRReader
         }
 
         /// <summary>
-        ///   Read the next record into bufferArr
+        ///   Read the next record into BufferArr
         /// </summary>
         private static void ReadRecord()
         {

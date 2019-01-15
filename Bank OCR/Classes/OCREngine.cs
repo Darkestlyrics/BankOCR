@@ -9,7 +9,8 @@ namespace OCRReader.Classes
     internal class OcrEngine
     {
         private readonly int _diceThreshold;
-        private int _hammingThreshold;
+        private readonly int _hammingThreshold;
+        private readonly int _misreadThreshold;
 
         /// <summary>
         ///   The Dictionary of characters
@@ -123,12 +124,14 @@ namespace OCRReader.Classes
         {
             _diceThreshold = 80;
             _hammingThreshold = 1;
+            _misreadThreshold = 3;
         }
 
-        public OcrEngine(int diceThreshold, int hammingThreshold)
+        public OcrEngine(int diceThreshold, int hammingThreshold, int misreadThreshold)
         {
             _diceThreshold = diceThreshold;
             _hammingThreshold = hammingThreshold;
+            _misreadThreshold = misreadThreshold;
         }
 
         /// <summary>
@@ -139,7 +142,7 @@ namespace OCRReader.Classes
         public string Decode(char[][] record)
         {
             var res = new StringBuilder();
-            var temp = new char[4][];
+            char[][] temp;
             for (var i = 0; i < record[0].Length / 3; i++)
             {
                 temp = CharArrayHelper.GetCharAtIndex(record, i);
@@ -148,7 +151,28 @@ namespace OCRReader.Classes
             }
 
             var decoded = res.ToString();
-            res.AppendLine($"Check sum Result: {(Checksum(decoded) ? "Pass" : "Fail")}");
+            res.Clear();
+
+            if (decoded.Contains("?"))
+            {
+                var misreadCount = decoded.ToCharArray().Count(o => o == '?');
+                if (misreadCount >= _misreadThreshold)
+                    res.AppendLine($"Decoded string misread count reached misread threshold: {decoded}");
+                res.AppendLine(
+                    $"Decoded string contains {misreadCount} misread character(s): {decoded} \r\n Attempting prediction");
+                var possibleStrings = GetPossibleStrings(record, decoded);
+                foreach (var possibleString in possibleStrings)
+                {
+                    res.AppendLine($"Possible Decoded String: {possibleString}");
+                    res.AppendLine($"Check sum Result: {(Checksum(possibleString) ? " Pass" : " Fail")}");
+                }
+            }
+            else
+            {
+                res.AppendLine($"Result: {decoded}");
+                res.AppendLine($"Check sum Result: {(Checksum(decoded) ? " Pass" : " Fail")}");
+            }
+
             return res.ToString();
         }
 
@@ -161,10 +185,18 @@ namespace OCRReader.Classes
         private List<string> GetPossibleStrings(char[][] record, string decoded)
         {
             var res = new List<string>();
-            var positions = CharArrayHelper.AllIndexesOf(decoded, "?").ToList();
-            foreach (var position in positions)
+            var initialPostion = decoded.IndexOf("?", StringComparison.Ordinal);
+            var tempString = decoded;
+            var checkChar = CharArrayHelper.GetCharAtIndex(record, initialPostion);
+            var possibleChars = GetPossibleMatches(checkChar);
+            foreach (var possibleChar in possibleChars)
             {
-                var checkPos = position == 0 ? 0 : position + 3;
+                tempString = tempString.Remove(initialPostion, 1).Insert(initialPostion, possibleChar.ToString());
+                if (tempString.Contains("?"))
+                    GetPossibleStrings(record, tempString).ForEach(o =>
+                        res.Add(o));
+                else
+                    res.Add(tempString);
             }
 
             return res;
@@ -177,10 +209,10 @@ namespace OCRReader.Classes
         /// <returns></returns>
         private List<char> GetPossibleMatches(char[][] temp)
         {
-            var possibleMatches = new List<char>();
+            List<char> possibleMatches;
             var possibleDictionary = CheckPossible(temp);
             possibleMatches = possibleDictionary.Where(o => o.Value.DiceCoeff >= _diceThreshold)
-                .Where(x => x.Value.Hamming == possibleDictionary.Min(o => o.Value.Hamming))
+                .Where(x => x.Value.Hamming <= _hammingThreshold)
                 .Select(o => o.Key)
                 .ToList();
             return possibleMatches;

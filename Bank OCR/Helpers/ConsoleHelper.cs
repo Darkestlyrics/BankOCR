@@ -16,7 +16,7 @@ namespace OCRReader.Helpers
                 {MessageType.Error, ConsoleColor.Red}
             };
 
-        private static void Write(string s, MessageType type)
+        public static void Write(string s, MessageType type)
         {
             Console.ForegroundColor = TypeColors.FirstOrDefault(o => o.Key == type).Value;
             Console.WriteLine(s);
