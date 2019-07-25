@@ -142,10 +142,9 @@ namespace OCRReader.Classes
         public string Decode(char[][] record)
         {
             var res = new StringBuilder();
-            char[][] temp;
             for (var i = 0; i < record[0].Length / 3; i++)
             {
-                temp = CharArrayHelper.GetCharAtIndex(record, i);
+                var temp = CharArrayHelper.GetCharAtIndex(record, i);
                 var match = GetMatch(temp);
                 res.Append(match);
             }

@@ -1,0 +1,8 @@
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\bin\Debug\TestData.txt
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\bin\Debug\OCR Reader.exe.config
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\bin\Debug\OCR Reader.exe
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\bin\Debug\OCR Reader.pdb
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\obj\Debug\OCR Reader.csprojAssemblyReference.cache
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\obj\Debug\OCR Reader.csproj.CoreCompileInputs.cache
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\obj\Debug\OCR Reader.exe
+C:\Users\CGreen\Documents\Milk\BankOCR\Bank OCR\obj\Debug\OCR Reader.pdb
